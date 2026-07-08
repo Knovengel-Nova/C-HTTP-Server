@@ -1,3 +1,4 @@
+#include "http.h"
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
@@ -11,10 +12,9 @@ typedef struct
     const void *body;
     size_t bodyLength;
 
-    char contentType[64];
-
 } HttpResponse;
 
+//  public APIs
 void sendHTML(Client *client, HttpStatus status, const char *html);
 
 void sendText(Client *client, HttpStatus status, const char *text);
@@ -25,18 +25,6 @@ void sendBinary(Client *client, HttpStatus status, const void *data, size_t size
 
 void redirect(Client *, const char *location);
 
-
-//  errors
-void send400(Client *);
-
-void send401(Client *);
-
-void send403(Client *);
-
-void send404(Client *);
-
-void send405(Client *);
-
-void send500(Client *);
+void sendError(Client * client, HttpStatus status);
 
 #endif
