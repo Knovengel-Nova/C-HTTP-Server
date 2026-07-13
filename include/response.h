@@ -25,6 +25,6 @@ void sendBinary(Client *client, HttpStatus status, const void *data, size_t size
 
 void redirect(Client *, const char *location);
 
-void sendError(Client * client, HttpStatus status);
+void sendError(Client *client, HttpStatus status);
 
 #endif

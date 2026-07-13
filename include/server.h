@@ -4,18 +4,20 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-typedef struct{
+typedef struct
+{
     int fd;
     int port;
     struct sockaddr_in address;
-}Server;
+} Server;
 
-typedef struct{
+typedef struct
+{
     int fd;
     struct sockaddr_in address;
     bool keepAlive;
     HttpRequest request;
-}Client;
+} Client;
 
 Server startServer(int port);
 Client acceptServer(Server server);

@@ -1,15 +1,17 @@
 #include "server.h"
 #include <arpa/inet.h>
 
-Server startServer(int port){
+Server startServer(int port)
+{
     Server server;
 
     struct sockaddr_in server_addr;
-    socklen_t addr_len  = sizeof(server_addr);
+    socklen_t addr_len = sizeof(server_addr);
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if(server_fd == -1){
+    if (server_fd == -1)
+    {
         perror("Server Socket");
         exit(1);
     }
@@ -21,13 +23,15 @@ Server startServer(int port){
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-    if(bind(server_fd, (struct sockaddr*) &server_addr, addr_len) < 0){
+    if (bind(server_fd, (struct sockaddr *)&server_addr, addr_len) < 0)
+    {
         perror("Bind Socket");
         close(server_fd);
         exit(1);
     }
 
-    if(listen(server_fd, 5)<0){
+    if (listen(server_fd, 5) < 0)
+    {
         perror("Listen");
         close(server_fd);
         exit(1);
@@ -48,7 +52,8 @@ Client acceptServer(Server server)
 
     int client_fd = accept(server.fd, (struct sockaddr *)&client_addr, &client_len);
 
-    if (client_fd < 0) {
+    if (client_fd < 0)
+    {
         perror("accept");
     }
 
@@ -58,6 +63,7 @@ Client acceptServer(Server server)
     return client;
 }
 
-void stopServer(Server server){
+void stopServer(Server server)
+{
     close(server.fd);
 }

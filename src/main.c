@@ -10,23 +10,23 @@
 
 #define PORT 80
 
-int main(){
+int main()
+{
     Server server;
     server = startServer(PORT);
-    
-    while(1){
+
+    while (1)
+    {
         Client client;
         client = acceptServer(server);
 
-        //read request
-        //parse request
-        //route request
+        // read request
+        // parse request
+        // route request
 
         close(client.fd);
-
-
     }
-    
+
     stopServer(server);
 
     return 0;

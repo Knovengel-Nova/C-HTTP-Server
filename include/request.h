@@ -29,7 +29,6 @@ typedef struct
     char value[256];
 } Cookie;
 
-
 void initRequest(HttpRequest *req);
 
 int parseRequest(const char *buffer, HttpRequest *req);
