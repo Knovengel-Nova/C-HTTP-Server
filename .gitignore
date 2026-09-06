@@ -1,0 +1,4 @@
+*.out
+*.exe
+server
+tp.c
