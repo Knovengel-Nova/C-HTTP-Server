@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <netinet/in.h>
 #include "request.h"
 
 #ifndef SERVER_H
@@ -11,7 +12,7 @@ typedef struct
     struct sockaddr_in address;
 } Server;
 
-typedef struct
+typedef struct Client
 {
     int fd;
     struct sockaddr_in address;
@@ -20,7 +21,7 @@ typedef struct
 } Client;
 
 Server startServer(int port);
-Client acceptServer(Server server);
+Client acceptServer(const Server *server);
 void stopServer(Server server);
 
 #endif

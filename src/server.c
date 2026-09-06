@@ -1,11 +1,15 @@
 #include "server.h"
 #include <arpa/inet.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 Server startServer(int port)
 {
     Server server;
 
     struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
     socklen_t addr_len = sizeof(server_addr);
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -44,13 +48,13 @@ Server startServer(int port)
     return server;
 }
 
-Client acceptServer(Server server)
+Client acceptServer(const Server *server)
 {
     Client client;
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
 
-    int client_fd = accept(server.fd, (struct sockaddr *)&client_addr, &client_len);
+    int client_fd = accept(server->fd, (struct sockaddr *)&client_addr, &client_len);
 
     if (client_fd < 0)
     {
@@ -59,6 +63,8 @@ Client acceptServer(Server server)
 
     client.fd = client_fd;
     client.address = client_addr;
+    client.keepAlive = false;
+    initRequest(&client.request);
 
     return client;
 }

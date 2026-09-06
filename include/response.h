@@ -2,6 +2,8 @@
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
+typedef struct Client Client;
+
 typedef struct
 {
     HttpStatus status;

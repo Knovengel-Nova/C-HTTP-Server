@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
 #include "response.h"
 #include "server.h"
 
@@ -7,7 +9,6 @@ static const char *statusString(HttpStatus status);
 static void initResponse(HttpResponse *resp);
 static void addHeader(HttpResponse *resp, const char *name, const char *value);
 static void sendResponse(Client *client, const HttpResponse *response);
-static void sendStatusPage(Client *Client, HttpStatus status, const char *title);
 
 void sendHTML(Client *client, HttpStatus status, const char *html)
 {
@@ -68,6 +69,11 @@ void sendBinary(Client *client, HttpStatus status, const void *data, size_t size
 void redirect(Client *client, const char *location)
 {
     HttpResponse resp;
+    initResponse(&resp);
+    resp.status = HTTP_FOUND;
+    addHeader(&resp, "Location", location);
+    addHeader(&resp, "Connection", "close");
+    sendResponse(client, &resp);
 }
 
 void sendError(Client *client, HttpStatus status)
@@ -93,24 +99,6 @@ void sendError(Client *client, HttpStatus status)
     sendHTML(client,
              status,
              html);
-}
-
-static void sendStatusPage(Client *client, HttpStatus status, const char *title)
-{
-    char html[256];
-
-    snprintf(html,
-             sizeof(html),
-             "<html>"
-             "<head><title>%d %s</title></head>"
-             "<body><h1>%d %s</h1></body>"
-             "</html>",
-             status,
-             title,
-             status,
-             title);
-
-    sendHTML(client, status, html);
 }
 
 static const char *statusString(HttpStatus status)
@@ -263,7 +251,6 @@ static void addHeader(HttpResponse *resp, const char *name, const char *value)
     if (resp->headerCount >= MAX_HEADERS)
         return;
 
-    HttpHeader header;
     strcpy(resp->headers[resp->headerCount].name, name);
     strcpy(resp->headers[resp->headerCount].value, value);
 
@@ -293,17 +280,31 @@ static void sendResponse(Client *client, const HttpResponse *response)
     }
 
     // content length
-    len += snprintf(buffer + len, sizeof(buffer) - len, "Content-Length: %zu", response->bodyLength);
+    len += snprintf(buffer + len, sizeof(buffer) - len,
+                    "Content-Length: %zu\r\n", response->bodyLength);
 
     // empty line
     len += snprintf(buffer + len, sizeof(buffer) - len, "\r\n");
 
     // send headers
-    send(client->fd, buffer, len, 0);
+    size_t sent = 0;
+    while (sent < (size_t)len) {
+        ssize_t written = send(client->fd, buffer + sent, (size_t)len - sent, 0);
+        if (written <= 0)
+            return;
+        sent += (size_t)written;
+    }
 
     // body
     if (response->body != NULL && response->bodyLength > 0)
     {
-        send(client->fd, response->body, response->bodyLength, 0);
+        sent = 0;
+        while (sent < response->bodyLength) {
+            ssize_t written = send(client->fd, (const char *)response->body + sent,
+                                   response->bodyLength - sent, 0);
+            if (written <= 0)
+                return;
+            sent += (size_t)written;
+        }
     }
 }
